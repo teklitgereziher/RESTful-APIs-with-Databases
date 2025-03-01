@@ -1,0 +1,42 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35728.132
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker-files", "docker-files", "{8A8D608E-211C-4604-AB02-D079F1B5F157}"
+	ProjectSection(SolutionItems) = preProject
+		docker-files\.dockerignore = docker-files\.dockerignore
+		docker-files\Dockerfile = docker-files\Dockerfile
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{41716308-AC50-45E5-8B5F-5A28DBB1D7A0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{BE16ECBA-18C7-4CAD-A053-37CDBBEF8C4A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureCosmos.CRUD.WebAPI", "src\AzureCosmos.CRUD.WebAPI\AzureCosmos.CRUD.WebAPI.csproj", "{0C623ACF-97DB-4B1F-BA52-9A04C126E60C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureCosmos.CRUD.DataAccess", "src\AzureCosmos.CRUD.DataAccess\AzureCosmos.CRUD.DataAccess.csproj", "{E5246AD9-22AB-4CBE-A06C-8A47D90558AD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0C623ACF-97DB-4B1F-BA52-9A04C126E60C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C623ACF-97DB-4B1F-BA52-9A04C126E60C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C623ACF-97DB-4B1F-BA52-9A04C126E60C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C623ACF-97DB-4B1F-BA52-9A04C126E60C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5246AD9-22AB-4CBE-A06C-8A47D90558AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5246AD9-22AB-4CBE-A06C-8A47D90558AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5246AD9-22AB-4CBE-A06C-8A47D90558AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5246AD9-22AB-4CBE-A06C-8A47D90558AD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0C623ACF-97DB-4B1F-BA52-9A04C126E60C} = {41716308-AC50-45E5-8B5F-5A28DBB1D7A0}
+		{E5246AD9-22AB-4CBE-A06C-8A47D90558AD} = {41716308-AC50-45E5-8B5F-5A28DBB1D7A0}
+	EndGlobalSection
+EndGlobal
