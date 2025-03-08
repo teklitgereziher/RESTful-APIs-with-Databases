@@ -21,20 +21,20 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
       container = cosmosClient.GetContainer(dbSettings.Value.DatabaseName, dbSettings.Value.ContainerName);
     }
 
-    public async Task<Book> GetBookAsync(string partyId)
+    public async Task<Book> GetBookAsync(string id)
     {
       try
       {
-        var itemResult = await container.ReadItemAsync<Book>(partyId, new PartitionKey(partyId));
+        var itemResult = await container.ReadItemAsync<Book>(id, new PartitionKey(id));
         return itemResult.Resource;
       }
       catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
       {
-        logger.LogWarning("Customer with partyId={PartyId} not found.", partyId);
+        logger.LogWarning("Book with bookId={BookId} not found.", id);
       }
       catch (CosmosException ex)
       {
-        logger.LogError(ex, "Error reading customer with partyId={PartyId}.", partyId);
+        logger.LogError(ex, "Error reading Book with bookId={BookId}.", id);
       }
       catch (ArgumentNullException ex)
       {
@@ -42,13 +42,13 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
       }
       catch (Exception ex)
       {
-        logger.LogError(ex, "Error reading customer with partyId={PartyId}.", partyId);
+        logger.LogError(ex, "Error reading customer with partyId={PartyId}.", id);
       }
 
       return null;
     }
 
-    public async Task<List<Book>> GetBooksAsync(IReadOnlyList<(string partyId, PartitionKey partitionKey)> items)
+    public async Task<List<Book>> GetBooksAsync(IReadOnlyList<(string bookId, PartitionKey partitionKey)> items)
     {
       try
       {
@@ -57,34 +57,34 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
       }
       catch (CosmosException ex)
       {
-        logger.LogError(ex, "Cosmos db exception while reading customers.");
+        logger.LogError(ex, "Cosmos db exception while reading books.");
       }
       catch (Exception ex)
       {
-        logger.LogError(ex, "Error reading customers.");
+        logger.LogError(ex, "Error reading books.");
       }
 
       return [];
     }
 
-    public async Task<Book> InsertOrReplaceAsync(Book customer)
+    public async Task<Book> InsertOrReplaceAsync(Book book)
     {
       try
       {
-        var itemResult = await container.UpsertItemAsync(customer, new PartitionKey(customer?.ISBN));
+        var itemResult = await container.UpsertItemAsync(book, new PartitionKey(book?.ISBN));
         if (itemResult.StatusCode == HttpStatusCode.Created)
         {
-          logger.LogInformation("Customer with partyId={PartyId} created.", customer.ISBN);
+          logger.LogInformation("Book with bookId={BookId} created.", book.ISBN);
         }
         else if (itemResult.StatusCode == HttpStatusCode.OK)
         {
-          logger.LogInformation("Customer with partyId={PartyId} updated.", customer.ISBN);
+          logger.LogInformation("Book with bookId={BookId} updated.", book.ISBN);
         }
         return itemResult.Resource;
       }
       catch (CosmosException ex)
       {
-        logger.LogError(ex, "Error inserting or replacing customer with partyId={PartyId}.", customer.ISBN);
+        logger.LogError(ex, "Error inserting or replacing book with bookId={BookId}.", book.ISBN);
       }
       catch (ArgumentNullException ex)
       {
@@ -92,10 +92,63 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
       }
       catch (Exception ex)
       {
-        logger.LogError(ex, "Error when inserting or replacing customer data.");
+        logger.LogError(ex, "Error when inserting or replacing book.");
       }
 
       return null;
+    }
+
+    public async Task<Book> UpdateBookAsync(string bookId, string bookTitle)
+    {
+      var book = await GetBookAsync(bookId);
+      if (book == null)
+      {
+        logger.LogWarning("Book with bookId={BookId} not found.", bookId);
+        return null;
+      }
+
+      book.Title = bookTitle;
+      var result = await container.ReplaceItemAsync<Book>(book, bookId, new PartitionKey(bookId));
+      if (result.StatusCode == HttpStatusCode.OK)
+      {
+        logger.LogInformation("Book with bookId={BookId} updated.", bookId);
+      }
+      else
+      {
+        logger.LogError("Failed to update book with bookId={BookId}. Satus code: {StatusCode}", bookId, result.StatusCode);
+      }
+
+      return result.Resource;
+    }
+
+    public async Task<bool?> DeleteBookAsync(string bookId)
+    {
+      try
+      {
+        var book = await container.DeleteItemAsync<Book>(bookId, new PartitionKey(bookId));
+        logger.LogInformation("Book with bookId={BookId} deleted.", bookId);
+
+        return true;
+      }
+      catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+      {
+        logger.LogWarning("Book with bookId={BookId} not found.", bookId);
+        return null;
+      }
+      catch (CosmosException ex)
+      {
+        logger.LogError(ex, "Error deleting book with bookId={BookId}.", bookId);
+      }
+      catch (ArgumentNullException ex)
+      {
+        logger.LogError(ex, "The argument to delete is null.");
+      }
+      catch (Exception ex)
+      {
+        logger.LogError(ex, "Error when deleting book.");
+      }
+
+      return false;
     }
   }
 }

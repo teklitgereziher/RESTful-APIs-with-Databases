@@ -10,7 +10,16 @@ namespace AzureCosmos.CRUD.WebAPI.Configurations
     {
       if (isDevelopment)
       {
-        services.AddSingleton(sp => new CosmosClient(dbSettings.ConnectionString, new() { ConnectionMode = ConnectionMode.Gateway }));
+        services.AddSingleton(sp => new CosmosClient(
+          dbSettings.ConnectionString,
+          new()
+          {
+            ConnectionMode = ConnectionMode.Gateway,
+            SerializerOptions = new CosmosSerializationOptions
+            {
+              PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
+            }
+          }));
       }
       else
       {

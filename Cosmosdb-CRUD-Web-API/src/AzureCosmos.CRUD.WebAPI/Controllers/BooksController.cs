@@ -78,5 +78,50 @@ namespace AzureCosmos.CRUD.WebAPI.Controllers
         return StatusCode(500, "Internal server error");
       }
     }
+
+    [HttpPost]
+    [Route("updatebook")]
+    public async Task<IActionResult> UpdateBook([Required][FromQuery] string bookId, string bookTitle)
+    {
+      try
+      {
+        var result = await bookRepository.UpdateBookAsync(bookId, bookTitle);
+        if (result == null)
+        {
+          return NotFound();
+        }
+
+        return Ok(result);
+      }
+      catch (Exception ex)
+      {
+        logger.LogError(ex, "Error while updating book.");
+        return StatusCode(500, "Internal server error");
+      }
+    }
+
+    [HttpDelete]
+    [Route("deletebook")]
+    public async Task<IActionResult> DeleteBook([Required][FromQuery] string bookId)
+    {
+      try
+      {
+        var result = await bookRepository.DeleteBookAsync(bookId);
+        if (result == true)
+        {
+          return Ok();
+        }
+        else if (result == false)
+        {
+          return Ok("Failed to delete the book.");
+        }
+        return NoContent();
+      }
+      catch (Exception ex)
+      {
+        logger.LogError(ex, "Error while deleting book.");
+        return StatusCode(500, "Internal server error");
+      }
+    }
   }
 }
