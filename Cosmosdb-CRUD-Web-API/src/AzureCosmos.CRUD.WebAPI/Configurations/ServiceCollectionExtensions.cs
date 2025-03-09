@@ -18,12 +18,15 @@ namespace AzureCosmos.CRUD.WebAPI.Configurations
             SerializerOptions = new CosmosSerializationOptions
             {
               PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
-            }
+            },
+            MaxRetryAttemptsOnRateLimitedRequests = 5,
+            MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(30)
           }));
       }
       else
       {
-        services.AddSingleton(sp => new CosmosClient(dbSettings.ResourceEndpoint, new ClientSecretCredential(
+        services.AddSingleton(sp => new CosmosClient(
+          dbSettings.ResourceEndpoint, new ClientSecretCredential(
           dbSettings.TenantId, dbSettings.ClientId, dbSettings.ClientSecret)));
       }
 

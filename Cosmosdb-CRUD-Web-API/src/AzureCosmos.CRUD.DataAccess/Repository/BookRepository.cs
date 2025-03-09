@@ -67,6 +67,37 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
       return [];
     }
 
+    public async Task AddBookAsync(Book book)
+    {
+      try
+      {
+        var bookResponse = await container.CreateItemAsync(book, new PartitionKey(book.ISBN));
+
+        if (bookResponse.StatusCode == System.Net.HttpStatusCode.Created)
+        {
+          logger.LogError("Book added successfully.");
+        }
+      }
+      catch (CosmosException ex)
+      {
+        switch (ex.StatusCode)
+        {
+          case HttpStatusCode.TooManyRequests:
+            logger.LogError(ex, "Request rate too large. Retry after: {RetryAfter} seconds.", ex.RetryAfter);
+            await Task.Delay((TimeSpan)ex.RetryAfter);
+            break;
+
+          case HttpStatusCode.BadRequest:
+            logger.LogError(ex, "Bad request: {Message}", ex.Message);
+            break;
+
+          default:
+            logger.LogError(ex, "An error occurred: {StatusCode}, {Message}", ex.StatusCode, ex.Message);
+            break;
+        }
+      }
+    }
+
     public async Task<Book> InsertOrReplaceAsync(Book book)
     {
       try
