@@ -26,6 +26,22 @@ namespace AzureCosmos.CRUD.WebAPI.Controllers
     {
       try
       {
+        if (OperatingSystem.IsWindows())
+        {
+          logger.LogInformation("This is a Windows operating system.");
+        }
+        else if (OperatingSystem.IsLinux())
+        {
+          logger.LogInformation("This is a Linux operating system.");
+        }
+        else if (OperatingSystem.IsMacOS())
+        {
+          logger.LogInformation("This is a macOS operating system.");
+        }
+        else
+        {
+          logger.LogInformation("This is an unknown operating system.");
+        }
         var book = await bookRepository.GetBookAsync(bookId);
         if (book == null)
         {

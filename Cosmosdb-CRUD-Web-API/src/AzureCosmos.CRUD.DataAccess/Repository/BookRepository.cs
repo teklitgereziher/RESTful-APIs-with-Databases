@@ -67,11 +67,12 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
       return [];
     }
 
-    public async Task AddBookAsync(Book book)
+    public async Task<Book> AddBookAsync(Book book)
     {
+      ItemResponse<Book> bookResponse = null;
       try
       {
-        var bookResponse = await container.CreateItemAsync(book, new PartitionKey(book.ISBN));
+        bookResponse = await container.CreateItemAsync(book, new PartitionKey(book.ISBN));
 
         if (bookResponse.StatusCode == System.Net.HttpStatusCode.Created)
         {
@@ -96,6 +97,8 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
             break;
         }
       }
+
+      return bookResponse?.Resource;
     }
 
     public async Task<Book> InsertOrReplaceAsync(Book book)
@@ -180,6 +183,27 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
       }
 
       return false;
+    }
+
+    public async Task<List<Book>> QueryBooksAsync(string bookTitle)
+    {
+      string sqlQueryText = $"SELECT * FROM c WHERE c.title = '{bookTitle}'";
+
+      var queryDefinition = new QueryDefinition(sqlQueryText);
+      FeedIterator<Book> queryResultSetIterator = container.GetItemQueryIterator<Book>(queryDefinition);
+
+      var books = new List<Book>();
+
+      while (queryResultSetIterator.HasMoreResults)
+      {
+        FeedResponse<Book> currentResultSet = await queryResultSetIterator.ReadNextAsync();
+        foreach (Book book in currentResultSet)
+        {
+          books.Add(book);
+        }
+      }
+
+      return books;
     }
   }
 }

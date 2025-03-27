@@ -17,5 +17,7 @@ namespace AzureCosmos.CRUD.WebAPI.AutoMapper
 
     private static readonly Lazy<IMapper> LazyMapper =
       new Lazy<IMapper>(LazyConfiguration.Value.CreateMapper);
+
+    public static IMapper Mapper => LazyMapper.Value;
   }
 }
