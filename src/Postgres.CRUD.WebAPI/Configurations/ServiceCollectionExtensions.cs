@@ -8,7 +8,7 @@ namespace Postgres.CRUD.WebAPI.Configurations
   {
     public static void AddPostgres(
       this IServiceCollection services,
-      PgSqlSettings pgsqlSettings,
+      PostgresSettings pgsqlSettings,
       bool isDevelopment)
     {
       if (isDevelopment)
@@ -22,7 +22,7 @@ namespace Postgres.CRUD.WebAPI.Configurations
       {
         services.AddDbContext<BookDbContext>((sp, options) =>
         {
-          options.UseNpgsql(pgsqlSettings.PgSqlConnectionString);
+          options.UseNpgsql(pgsqlSettings.ConnectionString);
           options.AddInterceptors(sp.GetRequiredService<DbAuthInterceptor>());
         });
       }

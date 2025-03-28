@@ -1,24 +1,50 @@
 using System.Data.Common;
+using Azure.Core;
+using Azure.Identity;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Options;
+using Npgsql;
 using Postgres.CRUD.DataAccess.Configs;
 
 namespace Postgres.CRUD.DataAccess.DatabaseContext
 {
   public class DbAuthInterceptor : DbConnectionInterceptor
   {
-    private readonly PgSqlSettings pgSqlSettings;
+    private readonly PostgresSettings pgSqlSettings;
     private readonly EntraIdSettings entraIdSettings;
+    private readonly ClientSecretCredential pgTokenProvider;
 
-    public DbAuthInterceptor(IOptions<PgSqlSettings> pgSqlSettings, IOptions<EntraIdSettings> entraIdSettings)
+    public DbAuthInterceptor(
+      IOptions<PostgresSettings> pgSqlSettings,
+      IOptions<EntraIdSettings> entraIdSettings,
+      ClientSecretCredential clientSecretCredential)
     {
       this.pgSqlSettings = pgSqlSettings.Value;
       this.entraIdSettings = entraIdSettings.Value;
+      pgTokenProvider = clientSecretCredential;
     }
 
-    public override async Task ConnectionOpenedAsync(DbConnection connection, ConnectionEndEventData eventData)
+    public override async ValueTask<InterceptionResult> ConnectionOpeningAsync(
+      DbConnection connection,
+      ConnectionEventData eventData,
+      InterceptionResult result,
+      CancellationToken cancellationToken = default)
     {
-      base.ConnectionOpened(connection, eventData);
+      AccessToken accessToken = await GetFreshTokenAsync();
+      connection.ConnectionString = pgSqlSettings.ConnectionString;
+      var pgSqlConnection = (NpgsqlConnection)connection;
+      pgSqlConnection.ConnectionString += accessToken.Token;
+
+      return result;
+    }
+
+    private async ValueTask<AccessToken> GetFreshTokenAsync()
+    {
+      var accessToken = await pgTokenProvider.GetTokenAsync(
+          new TokenRequestContext(pgSqlSettings.Scopes),
+          CancellationToken.None);
+
+      return accessToken;
     }
   }
 }

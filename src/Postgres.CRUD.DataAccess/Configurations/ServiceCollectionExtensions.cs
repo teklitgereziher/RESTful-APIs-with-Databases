@@ -3,13 +3,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Postgres.CRUD.DataAccess.Configs;
 using Postgres.CRUD.DataAccess.DatabaseContext;
 
-namespace Postgres.CRUD.DataAccess.Configurations
+namespace Postgres.CRUD.WebAPI.Configurations
 {
   public static class ServiceCollectionExtensions
   {
-    public static void AddPostgres(
+    public static void AddPostgreSql(
       this IServiceCollection services,
-      PgSqlSettings pgsqlSettings,
+      PostgresSettings pgsqlSettings,
       bool isDevelopment)
     {
       if (isDevelopment)
@@ -23,7 +23,7 @@ namespace Postgres.CRUD.DataAccess.Configurations
       {
         services.AddDbContext<BookDbContext>((sp, options) =>
         {
-          options.UseNpgsql(pgsqlSettings.PgSqlConnectionString);
+          options.UseNpgsql(pgsqlSettings.ConnectionString);
           options.AddInterceptors(sp.GetRequiredService<DbAuthInterceptor>());
         });
       }
