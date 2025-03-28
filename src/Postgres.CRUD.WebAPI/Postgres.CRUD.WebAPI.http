@@ -1,0 +1,6 @@
+@Postgres.CRUD.WebAPI_HostAddress = http://localhost:5124
+
+GET {{Postgres.CRUD.WebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
