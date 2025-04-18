@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Testcontainers.CosmosDb;
 
-namespace AzureCosmos.CRUD.IntegrationTests.Setup
+namespace AzureCosmos.CRUD.IntegrationTests.SetupCosmos
 {
   [CollectionDefinition(nameof(TestFixture))]
   public class BaseIntegrationTest : ICollectionFixture<TestFixture> { }

@@ -1,4 +1,4 @@
-namespace CRUD_Operation_DataAccess.Models
+namespace AzureCosmos.CRUD.DataAccess.Models
 {
   public class Author
   {
@@ -6,6 +6,5 @@ namespace CRUD_Operation_DataAccess.Models
     public string Phone { get; set; }
     public string Email { get; set; }
     public string Website { get; set; }
-    public Address Address { get; set; }
   }
 }

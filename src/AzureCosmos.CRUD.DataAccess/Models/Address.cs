@@ -1,4 +1,4 @@
-namespace CRUD_Operation_DataAccess.Models
+namespace AzureCosmos.CRUD.DataAccess.Models
 {
   public class Address
   {

@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Postgres.CRUD.DataAccess.Repository;
 
-namespace AzureCosmos.CRUD.IntegrationTests.SetupPostgres
+namespace AzureCosmos.CRUD.IntegrationTests.Setup
 {
   public class BaseIntegrationTest<T> : IClassFixture<IntegrationTestFactory>
   {

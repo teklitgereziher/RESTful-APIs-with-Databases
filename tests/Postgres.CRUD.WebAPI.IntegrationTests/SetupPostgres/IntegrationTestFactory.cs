@@ -1,16 +1,15 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Postgres.CRUD.DataAccess.DatabaseContext;
-using Postgres.CRUD.WebAPI;
+using Postgres.CRUD.DataAccess.Models;
 using Testcontainers.PostgreSql;
 
-namespace AzureCosmos.CRUD.IntegrationTests.SetupPostgres
+namespace Postgres.CRUD.WebAPI.IntegrationTests.SetupPostgres
 {
   public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
   {
@@ -65,10 +64,9 @@ namespace AzureCosmos.CRUD.IntegrationTests.SetupPostgres
 
     public void ClearTables()
     {
-      var userDbSet = dbContext.Set<User>();
+      var userDbSet = dbContext.Set<Book>();
       userDbSet.RemoveRange(userDbSet);
       dbContext.SaveChanges();
     }
   }
-
 }

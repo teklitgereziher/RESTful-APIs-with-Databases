@@ -11,7 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.CosmosDb;
 
-namespace AzureCosmos.CRUD.IntegrationTests.Setup
+namespace AzureCosmos.CRUD.IntegrationTests.SetupCosmos
 {
   public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
   {

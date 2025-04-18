@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace AzureCosmos.CRUD.IntegrationTests.SetupPostgres
+namespace AzureCosmos.CRUD.IntegrationTests.Setup
 {
   public class MockAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
   {

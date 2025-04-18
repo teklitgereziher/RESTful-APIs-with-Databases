@@ -1,14 +1,14 @@
+using AzureCosmos.CRUD.DataAccess.Repository;
+using AzureCosmos.CRUD.WebAPI.Controllers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Postgres.CRUD.DataAccess.Repository;
-using Postgres.CRUD.WebAPI.Controllers;
 
-namespace AzureCosmos.CRUD.IntegrationTests.SetupPostgres
+namespace AzureCosmos.CRUD.IntegrationTests.Setup
 {
   public class ApiBaseIntegrationTest : IClassFixture<IntegrationTestFactory>
   {
     protected readonly IBookRepository bookRepository;
-    protected readonly ILogger<BookController> logger;
+    protected readonly ILogger<BooksController> logger;
     protected readonly HttpClient clientWithAuth;
     protected readonly HttpClient clientWithoutAuth;
 
@@ -18,8 +18,9 @@ namespace AzureCosmos.CRUD.IntegrationTests.SetupPostgres
       clientWithAuth = factory.WithAuthentication()
         .CreateAndConfigureClient();
 
-      bookRepository = factory.Services.GetRequiredService<IBookRepository>();
-      logger = factory.Services.GetRequiredService<ILogger<BookController>>();
+      var serviceScope = factory.Services.CreateScope();
+      bookRepository = serviceScope.ServiceProvider.GetService<IBookRepository>();
+      logger = serviceScope.ServiceProvider.GetService<ILogger<BooksController>>();
     }
   }
 }

@@ -8,7 +8,7 @@ using Microsoft.Azure.Cosmos;
 namespace AzureCosmos.CRUD.WebAPI.Controllers
 {
   [ApiController]
-  [Route("books")]
+  [Route("api/books")]
   public class BooksController : ControllerBase
   {
     private readonly ILogger<BooksController> logger;

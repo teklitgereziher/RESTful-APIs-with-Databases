@@ -4,11 +4,10 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AzureCosmos.CRUD.IntegrationTests.SetupPostgres
+namespace Postgres.CRUD.WebAPI.IntegrationTests.SetupPostgres
 {
   public static class WebApplicationFactoryExtensions
   {
-
     private const string testAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvaWQiOiJ1c2VyMSJ9.abc123";
     public static WebApplicationFactory<T> WithAuthentication<T>(
       this WebApplicationFactory<T> factory) where T : class
@@ -59,5 +58,4 @@ namespace AzureCosmos.CRUD.IntegrationTests.SetupPostgres
       return client;
     }
   }
-
 }

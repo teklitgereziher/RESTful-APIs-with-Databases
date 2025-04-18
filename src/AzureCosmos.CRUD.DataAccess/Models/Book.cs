@@ -1,4 +1,3 @@
-using CRUD_Operation_DataAccess.Models;
 using Newtonsoft.Json;
 
 namespace AzureCosmos.CRUD.DataAccess.Models
