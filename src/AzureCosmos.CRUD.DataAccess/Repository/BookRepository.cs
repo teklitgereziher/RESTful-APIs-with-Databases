@@ -72,7 +72,7 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
       ItemResponse<Book> bookResponse = null;
       try
       {
-        bookResponse = await container.CreateItemAsync(book, new PartitionKey(book.ISBN));
+        bookResponse = await container.CreateItemAsync(book, new PartitionKey(book.Id));
 
         if (bookResponse.StatusCode == System.Net.HttpStatusCode.Created)
         {
@@ -105,20 +105,20 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
     {
       try
       {
-        var itemResult = await container.UpsertItemAsync(book, new PartitionKey(book?.ISBN));
+        var itemResult = await container.UpsertItemAsync(book, new PartitionKey(book?.Id));
         if (itemResult.StatusCode == HttpStatusCode.Created)
         {
-          logger.LogInformation("Book with bookId={BookId} created.", book.ISBN);
+          logger.LogInformation("Book with bookId={BookId} created.", book.Id);
         }
         else if (itemResult.StatusCode == HttpStatusCode.OK)
         {
-          logger.LogInformation("Book with bookId={BookId} updated.", book.ISBN);
+          logger.LogInformation("Book with bookId={BookId} updated.", book.Id);
         }
         return itemResult.Resource;
       }
       catch (CosmosException ex)
       {
-        logger.LogError(ex, "Error inserting or replacing book with bookId={BookId}.", book.ISBN);
+        logger.LogError(ex, "Error inserting or replacing book with bookId={BookId}.", book.Id);
       }
       catch (ArgumentNullException ex)
       {
