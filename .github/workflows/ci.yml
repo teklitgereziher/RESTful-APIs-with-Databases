@@ -1,1 +1,38 @@
+name: CI Pipeline
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [ready_for_review, opened, synchronize, reopened]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_VERSION: 9.0.x
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build project
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Install dotnet-coverage # dotnet-reportgenerator-globaltool
+        run: dotnet tool install --global dotnet-coverage
+
+      - name: Run tests
+        run: dotnet-coverage collect "dotnet test --no-restore --logger console;verbosity=detailed;consoleLoggerParameters=ErrorsOnly" -f xml -o "coverage.xml"

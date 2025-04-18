@@ -29,6 +29,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Postgres.CRUD.WebAPI.Integr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Postgres.CRUD.WebAPI.UnitTests", "tests\Postgres.CRUD.WebAPI.UnitTests\Postgres.CRUD.WebAPI.UnitTests.csproj", "{A6BDBA35-C34C-4809-95F1-1ED8C45460CD}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{E1B77AB6-ABED-4E3A-A8D0-41C1AAD84FAD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{2E215010-F93C-4820-88A6-A6644C10E60B}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\ci.yml = .github\workflows\ci.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -80,5 +87,6 @@ Global
 		{B312FA81-C4D1-4C02-927A-B86154CC5613} = {41716308-AC50-45E5-8B5F-5A28DBB1D7A0}
 		{1D6F0E5A-F135-4373-973B-7743A9E9E236} = {BE16ECBA-18C7-4CAD-A053-37CDBBEF8C4A}
 		{A6BDBA35-C34C-4809-95F1-1ED8C45460CD} = {BE16ECBA-18C7-4CAD-A053-37CDBBEF8C4A}
+		{2E215010-F93C-4820-88A6-A6644C10E60B} = {E1B77AB6-ABED-4E3A-A8D0-41C1AAD84FAD}
 	EndGlobalSection
 EndGlobal
