@@ -53,17 +53,17 @@ jobs:
       #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: Sonarscanner for dotnet
-      #   uses: Secbyte/dotnet-sonarscanner@v2.3
-      #   with:
-      #     buildCommand: dotnet build .
-      #     testCommand: dotnet test --no-restore --logger console;verbosity=detailed;consoleLoggerParameters=ErrorsOnly" -f xml -o "coverage.xml" .
-      #     projectKey: ${{ secrets.PROJECT_KEY }}
-      #     projectName: ${{ secrets.PROJECT_NAME }}
-      #     sonarOrganisation: ${{ secrets.ORG_KEY}}
-      #     beginArguments: >
-      #         /d:sonar.verbose="true"
-      #         /d:sonar.cs.opencover.reportsPaths='"./coverage.xml"'
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Sonarscanner for dotnet
+        uses: Secbyte/dotnet-sonarscanner@v2.3
+        with:
+          buildCommand: dotnet build .
+          testCommand: dotnet test --no-restore --logger console;verbosity=detailed;consoleLoggerParameters=ErrorsOnly" -f xml -o "coverage.xml" .
+          projectKey: ${{ secrets.PROJECT_KEY }}
+          projectName: ${{ secrets.PROJECT_NAME }}
+          sonarOrganisation: ${{ secrets.ORG_KEY}}
+          beginArguments: >
+              /d:sonar.verbose="true"
+              /d:sonar.cs.opencover.reportsPaths='"./coverage.xml"'
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
