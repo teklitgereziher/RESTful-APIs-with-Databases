@@ -17,7 +17,6 @@ namespace AzureCosmos.CRUD.IntegrationTests.Setup
   public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
   {
     CosmosClient cosmosClient;
-    private IConfiguration configuration;
     private static readonly IOutputConsumer outputConsumer = Consume.RedirectStdoutAndStderrToStream(new MemoryStream(), new MemoryStream());
     private CosmosDbContainer cosmosDbContainer = new CosmosDbBuilder()
       .WithImage("mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest")

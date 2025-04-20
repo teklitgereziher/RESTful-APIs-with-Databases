@@ -30,7 +30,7 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
       }
       catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
       {
-        logger.LogWarning("Book with bookId={BookId} not found.", id);
+        logger.LogWarning(ex, "Book with bookId={BookId} not found.", id);
       }
       catch (CosmosException ex)
       {
@@ -108,17 +108,17 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
         var itemResult = await container.UpsertItemAsync(book, new PartitionKey(book?.Id));
         if (itemResult.StatusCode == HttpStatusCode.Created)
         {
-          logger.LogInformation("Book with bookId={BookId} created.", book.Id);
+          logger.LogInformation("Book with bookId={BookId} created.", book?.Id);
         }
         else if (itemResult.StatusCode == HttpStatusCode.OK)
         {
-          logger.LogInformation("Book with bookId={BookId} updated.", book.Id);
+          logger.LogInformation("Book with bookId={BookId} updated.", book?.Id);
         }
         return itemResult.Resource;
       }
       catch (CosmosException ex)
       {
-        logger.LogError(ex, "Error inserting or replacing book with bookId={BookId}.", book.Id);
+        logger.LogError(ex, "Error inserting or replacing book with bookId={BookId}.", book?.Id);
       }
       catch (ArgumentNullException ex)
       {
@@ -159,14 +159,14 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
     {
       try
       {
-        var book = await container.DeleteItemAsync<Book>(bookId, new PartitionKey(bookId));
+        await container.DeleteItemAsync<Book>(bookId, new PartitionKey(bookId));
         logger.LogInformation("Book with bookId={BookId} deleted.", bookId);
 
         return true;
       }
       catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
       {
-        logger.LogWarning("Book with bookId={BookId} not found.", bookId);
+        logger.LogWarning(ex, "Book with bookId={BookId} not found.", bookId);
         return null;
       }
       catch (CosmosException ex)

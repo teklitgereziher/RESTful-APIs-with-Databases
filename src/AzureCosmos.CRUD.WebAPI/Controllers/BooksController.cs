@@ -53,7 +53,7 @@ namespace AzureCosmos.CRUD.WebAPI.Controllers
       catch (Exception ex)
       {
         logger.LogError(ex, "Error while getting a book.");
-        return StatusCode(500, "Internal server error");
+        return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
       }
     }
 
@@ -74,7 +74,7 @@ namespace AzureCosmos.CRUD.WebAPI.Controllers
       catch (Exception ex)
       {
         logger.LogError(ex, "Error while getting books.");
-        return StatusCode(500, "Internal server error");
+        return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
       }
     }
 
@@ -91,7 +91,7 @@ namespace AzureCosmos.CRUD.WebAPI.Controllers
       catch (Exception ex)
       {
         logger.LogError(ex, "Error while adding book to database.");
-        return StatusCode(500, "Internal server error");
+        return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
       }
     }
 
@@ -112,7 +112,7 @@ namespace AzureCosmos.CRUD.WebAPI.Controllers
       catch (Exception ex)
       {
         logger.LogError(ex, "Error while updating book.");
-        return StatusCode(500, "Internal server error");
+        return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
       }
     }
 
@@ -136,7 +136,7 @@ namespace AzureCosmos.CRUD.WebAPI.Controllers
       catch (Exception ex)
       {
         logger.LogError(ex, "Error while deleting book.");
-        return StatusCode(500, "Internal server error");
+        return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
       }
     }
   }

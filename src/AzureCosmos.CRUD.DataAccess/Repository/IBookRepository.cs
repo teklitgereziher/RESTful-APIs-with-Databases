@@ -5,7 +5,7 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
 {
   public interface IBookRepository
   {
-    Task<Book> GetBookAsync(string bookId);
+    Task<Book> GetBookAsync(string id);
     Task<List<Book>> GetBooksAsync(IReadOnlyList<(string bookId, PartitionKey partitionKey)> items);
     Task<Book> InsertOrReplaceAsync(Book book);
     Task<Book> UpdateBookAsync(string bookId, string bookTitle);

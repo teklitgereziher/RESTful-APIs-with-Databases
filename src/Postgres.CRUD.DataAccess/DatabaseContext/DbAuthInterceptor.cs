@@ -11,16 +11,13 @@ namespace Postgres.CRUD.DataAccess.DatabaseContext
   public class DbAuthInterceptor : DbConnectionInterceptor
   {
     private readonly PostgresSettings pgSqlSettings;
-    private readonly EntraIdSettings entraIdSettings;
     private readonly ClientSecretCredential pgTokenProvider;
 
     public DbAuthInterceptor(
       IOptions<PostgresSettings> pgSqlSettings,
-      IOptions<EntraIdSettings> entraIdSettings,
       ClientSecretCredential clientSecretCredential)
     {
       this.pgSqlSettings = pgSqlSettings.Value;
-      this.entraIdSettings = entraIdSettings.Value;
       pgTokenProvider = clientSecretCredential;
     }
 
