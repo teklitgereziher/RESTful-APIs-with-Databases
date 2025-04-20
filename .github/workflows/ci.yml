@@ -18,7 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+            fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
@@ -36,3 +38,16 @@ jobs:
 
       - name: Run tests
         run: dotnet-coverage collect "dotnet test --no-restore --logger console;verbosity=detailed;consoleLoggerParameters=ErrorsOnly" -f xml -o "coverage.xml"
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@5
+        with:
+          projectBaseDir: .
+          args: >
+            -Dsonar.organization=${{ secrets.ORG_KEY}} # For SonarQube Cloud only
+            -Dsonar.projectKey=${{ secrets.PROJECT_KEY }}
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+            -Dsonar.tests=tests/
+            -Dsonar.verbose=true
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
