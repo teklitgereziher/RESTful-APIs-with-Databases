@@ -30,40 +30,21 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
+      - name: Sonarqube Begin
+        run: | 
+          dotnet tool install --global dotnet-sonarscanner
+          dotnet sonarscanner begin /o:${{ secrets.ORG_KEY }} /k:${{ secrets.PROJECT_KEY }} /d:sonar.login=${{ secrets.SONAR_TOKEN }} /s:$GITHUB_WORKSPACE/SonarQube.Analysis.xml
+
       - name: Build project
         run: dotnet build --configuration Release --no-restore
 
-      - name: Install dotnet-coverage # dotnet-reportgenerator-globaltool
-        run: dotnet tool install --global dotnet-coverage
+      # - name: Install dotnet-coverage # dotnet-reportgenerator-globaltool
+      #   run: dotnet tool install --global dotnet-coverage
 
       - name: Run tests
-        run: dotnet-coverage collect "dotnet test --no-restore --logger console;verbosity=detailed;consoleLoggerParameters=ErrorsOnly" -f xml -o "coverage.xml"
+        run: dotnet test --settings coverlet.runsettings --logger:trx
 
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@3.1.0
-        with:
-          projectBaseDir: .
-          args: >
-            -Dsonar.organization=${{ secrets.ORG_KEY}} # For SonarQube Cloud only
-            -Dsonar.projectKey=${{ secrets.PROJECT_KEY }}
-            -Dsonar.python.coverage.reportPaths=coverage.xml
-            -Dsonar.tests=tests/
-            -Dsonar.verbose=true
+      - name: Sonarqube end
+        run: dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # - name: Sonarscanner for dotnet
-      #   uses: Secbyte/dotnet-sonarscanner@v2.3
-      #   with:
-      #     buildCommand: dotnet build .
-      #     testCommand: dotnet test --no-restore --logger console;verbosity=detailed;consoleLoggerParameters=ErrorsOnly" -f xml -o "coverage.xml" .
-      #     projectKey: ${{ secrets.PROJECT_KEY }}
-      #     projectName: ${{ secrets.PROJECT_NAME }}
-      #     sonarOrganisation: ${{ secrets.ORG_KEY}}
-      #     beginArguments: >
-      #         /d:sonar.verbose="true"
-      #         /d:sonar.cs.opencover.reportsPaths='"./coverage.xml"'
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
