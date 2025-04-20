@@ -11,6 +11,7 @@ namespace AzureCosmos.CRUD.WebAPI.Controllers
   [Route("api/books")]
   public class BooksController : ControllerBase
   {
+    private const string InternalServerErrorMessage = "Internal server error";
     private readonly ILogger<BooksController> logger;
     private readonly IBookRepository bookRepository;
 
@@ -53,7 +54,7 @@ namespace AzureCosmos.CRUD.WebAPI.Controllers
       catch (Exception ex)
       {
         logger.LogError(ex, "Error while getting a book.");
-        return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+        return StatusCode(StatusCodes.Status500InternalServerError, InternalServerErrorMessage);
       }
     }
 
@@ -74,7 +75,7 @@ namespace AzureCosmos.CRUD.WebAPI.Controllers
       catch (Exception ex)
       {
         logger.LogError(ex, "Error while getting books.");
-        return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+        return StatusCode(StatusCodes.Status500InternalServerError, InternalServerErrorMessage);
       }
     }
 
@@ -91,7 +92,7 @@ namespace AzureCosmos.CRUD.WebAPI.Controllers
       catch (Exception ex)
       {
         logger.LogError(ex, "Error while adding book to database.");
-        return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+        return StatusCode(StatusCodes.Status500InternalServerError, InternalServerErrorMessage);
       }
     }
 
@@ -112,7 +113,7 @@ namespace AzureCosmos.CRUD.WebAPI.Controllers
       catch (Exception ex)
       {
         logger.LogError(ex, "Error while updating book.");
-        return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+        return StatusCode(StatusCodes.Status500InternalServerError, InternalServerErrorMessage);
       }
     }
 
@@ -136,7 +137,7 @@ namespace AzureCosmos.CRUD.WebAPI.Controllers
       catch (Exception ex)
       {
         logger.LogError(ex, "Error while deleting book.");
-        return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+        return StatusCode(StatusCodes.Status500InternalServerError, InternalServerErrorMessage);
       }
     }
   }

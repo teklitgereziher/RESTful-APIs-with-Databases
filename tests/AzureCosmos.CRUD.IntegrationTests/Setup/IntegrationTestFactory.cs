@@ -38,11 +38,10 @@ namespace AzureCosmos.CRUD.IntegrationTests.Setup
         config.AddJsonFile(configPath);
       });
 
-      //var conString = cosmosDbContainer.GetConnectionString();
       base.ConfigureWebHost(builder);
       builder.ConfigureTestServices(services =>
       {
-        services.RemoveAll(typeof(CosmosClient));
+        services.RemoveAll<CosmosClient>();
         services.AddSingleton(sp => new CosmosClient(cosmosDbContainer.GetConnectionString(), new CosmosClientOptions
         {
           ConnectionMode = ConnectionMode.Gateway,

@@ -3,10 +3,10 @@ using AzureCosmos.CRUD.DataAccess.Repository;
 using AzureCosmos.CRUD.WebAPI.AutoMapper;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Testcontainers.CosmosDb;
 
 namespace AzureCosmos.CRUD.IntegrationTests.SetupCosmos
@@ -17,14 +17,8 @@ namespace AzureCosmos.CRUD.IntegrationTests.SetupCosmos
   public class TestFixture : IAsyncLifetime
   {
     private IConfiguration configuration;
-    private readonly IOutputConsumer outputConsumer = Consume.RedirectStdoutAndStderrToStream(new MemoryStream(), new MemoryStream());
-    private CosmosDbContainer cosmosDbContainer;
-
-    public IServiceProvider ServiceProvider;
-
-    public async Task InitializeAsync()
-    {
-      cosmosDbContainer = new CosmosDbBuilder()
+    private static readonly IOutputConsumer outputConsumer = Consume.RedirectStdoutAndStderrToStream(new MemoryStream(), new MemoryStream());
+    private CosmosDbContainer cosmosDbContainer = new CosmosDbBuilder()
       .WithImage("mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest")
       .WithName("cosmosdb-test-emulator")
       .WithPortBinding(8081, 8081)
@@ -35,6 +29,10 @@ namespace AzureCosmos.CRUD.IntegrationTests.SetupCosmos
       .UntilMessageIsLogged("Started"))
       .Build();
 
+    public IServiceProvider ServiceProvider;
+
+    public async Task InitializeAsync()
+    {
       string configPath = Path.Combine(Directory.GetParent(
           Directory.GetCurrentDirectory()).Parent.Parent.FullName, "Setup", "appsettings.json");
 
@@ -42,7 +40,7 @@ namespace AzureCosmos.CRUD.IntegrationTests.SetupCosmos
         .AddJsonFile(configPath, optional: false, reloadOnChange: true)
         .Build();
 
-      var builder = Host.CreateApplicationBuilder();
+      var builder = WebApplication.CreateBuilder();
 
       builder.Services.AddSingleton(configuration);
 
