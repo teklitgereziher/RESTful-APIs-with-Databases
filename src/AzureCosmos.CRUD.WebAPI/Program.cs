@@ -1,6 +1,8 @@
 using AzureCosmos.CRUD.DataAccess.Config;
 using AzureCosmos.CRUD.DataAccess.Repository;
 using AzureCosmos.CRUD.WebAPI.Configurations;
+using Microsoft.Extensions.Http.Resilience;
+using Polly;
 
 namespace AzureCosmos.CRUD.WebAPI
 {
@@ -18,6 +20,27 @@ namespace AzureCosmos.CRUD.WebAPI
       builder.Services.AddControllers();
       // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
       builder.Services.AddOpenApi();
+
+      // Configure a singleton HttpClient with resilience pipelines
+      builder.Services.AddSingleton(sp =>
+      {
+        var retryPipeline = new ResiliencePipelineBuilder<HttpResponseMessage>()
+            .AddRetry(new HttpRetryStrategyOptions
+            {
+              BackoffType = DelayBackoffType.Exponential,
+              MaxRetryAttempts = 3
+            }).Build();
+
+        var resilienceHandler = new ResilienceHandler(retryPipeline)
+        {
+          InnerHandler = new SocketsHttpHandler
+          {
+            PooledConnectionLifetime = TimeSpan.FromMinutes(15)
+          },
+        };
+
+        return new HttpClient(resilienceHandler);
+      });
 
       var app = builder.Build();
 

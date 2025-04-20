@@ -1,3 +1,4 @@
+using AzureCosmos.CRUD.DataAccess.Config;
 using AzureCosmos.CRUD.WebAPI;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
@@ -8,6 +9,7 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using Testcontainers.CosmosDb;
 
 namespace AzureCosmos.CRUD.IntegrationTests.Setup
@@ -69,9 +71,10 @@ namespace AzureCosmos.CRUD.IntegrationTests.Setup
     public async Task InitializeAsync()
     {
       await cosmosDbContainer.StartAsync();
+      var dbSettings = Services.GetRequiredService<IOptions<CosmosSettings>>().Value;
       cosmosClient = Services.CreateScope().ServiceProvider.GetRequiredService<CosmosClient>();
-      var database = await cosmosClient.CreateDatabaseIfNotExistsAsync("BookDB");
-      await database.Database.CreateContainerIfNotExistsAsync("Books", "/id");
+      var database = await cosmosClient.CreateDatabaseIfNotExistsAsync(dbSettings.DatabaseName);
+      await database.Database.CreateContainerIfNotExistsAsync(dbSettings.ContainerName, "/id");
     }
 
     /// <summary>
