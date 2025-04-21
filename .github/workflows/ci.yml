@@ -44,7 +44,7 @@ jobs:
       - name: Run tests
         run: dotnet test --settings coverlet.runsettings --logger:trx
 
-      - name: Sonarqube end
+      - name: Sonarqube End
         run: dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
