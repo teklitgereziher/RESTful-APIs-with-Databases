@@ -34,7 +34,11 @@ jobs:
       - name: Sonarqube Begin
         run: | 
           dotnet tool install --global dotnet-sonarscanner
-          dotnet sonarscanner begin /o:${{ secrets.ORG_KEY }} /k:${{ secrets.PROJECT_KEY }} /d:sonar.token=${{ secrets.SONAR_TOKEN }} /s:$GITHUB_WORKSPACE/SonarQube.Analysis.xml
+          dotnet sonarscanner begin \
+          -o:${{ secrets.ORG_KEY }} \
+          -k:${{ secrets.PROJECT_KEY }} \
+          -d:sonar.token=${{ secrets.SONAR_TOKEN }} \
+          -s:$GITHUB_WORKSPACE/SonarQube.Analysis.xml
 
       # Between the begin and end steps, you need to build your project, execute tests, and generate code coverage data.
       - name: Build project
