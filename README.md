@@ -1,3 +1,5 @@
+[![CI Pipeline](https://github.com/teklitgereziher/RESTful-APIs-with-Databases/actions/workflows/ci.yml/badge.svg)](https://github.com/teklitgereziher/RESTful-APIs-with-Databases/actions/workflows/ci.yml)
+
 # RESTful-APIs-with-Databases
 This repo contains practices on how to use different databases with ASP.NET Core Web API and Docker.
 
