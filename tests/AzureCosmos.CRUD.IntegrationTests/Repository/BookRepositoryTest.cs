@@ -84,7 +84,7 @@ namespace AzureCosmos.CRUD.IntegrationTests.Repository
       var result = await repository.DeleteBookAsync(bookId);
 
       // Assert
-      Assert.NotNull(result);
+      Assert.Null(result);
     }
 
     [Fact]
