@@ -14,6 +14,9 @@ using Testcontainers.CosmosDb;
 
 namespace AzureCosmos.CRUD.IntegrationTests.Setup
 {
+  /// <summary>
+  /// This test setup class is shared across all integration tests.
+  /// </summary>
   public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
   {
     CosmosClient cosmosClient;
