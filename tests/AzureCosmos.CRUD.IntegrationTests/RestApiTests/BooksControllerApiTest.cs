@@ -1,17 +1,26 @@
 using System.Net;
 using System.Net.Http.Json;
 using AzureCosmos.CRUD.DataAccess.Models;
+using AzureCosmos.CRUD.DataAccess.Repository;
 using AzureCosmos.CRUD.IntegrationTests.Setup;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 
 namespace AzureCosmos.CRUD.IntegrationTests.RestApiTests
 {
-  public class BooksControllerApiTest : ApiBaseIntegrationTest
+  [Collection("IntegrationTestCollection")]
+  public class BooksControllerApiTest
   {
-    private readonly IntegrationTestFactory factory;
-    public BooksControllerApiTest(IntegrationTestFactory factory) : base(factory)
+    private readonly IBookRepository bookRepository;
+    private readonly HttpClient clientWithAuth;
+    private readonly HttpClient clientWithoutAuth;
+
+    public BooksControllerApiTest(IntegrationTestFactory factory)
     {
-      this.factory = factory;
+      clientWithAuth = factory.WithAuthentication()
+        .CreateAndConfigureClient();
+      clientWithoutAuth = factory.CreateClient();
+      bookRepository = factory.Services.CreateScope().ServiceProvider.GetService<IBookRepository>();
     }
 
     [Fact]
