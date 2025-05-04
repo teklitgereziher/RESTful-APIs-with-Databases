@@ -1,12 +1,21 @@
 using System.ComponentModel.DataAnnotations;
 using AzureCosmos.CRUD.DataAccess.Models;
 using AzureCosmos.CRUD.DataAccess.Repository;
+//using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Azure.Cosmos;
+//using Microsoft.Identity.Web.Resource;
 
 namespace AzureCosmos.CRUD.WebAPI.Controllers
 {
+  //[Authorize]
+  //[RequiredScope(AcceptedScope = ["ToDoList.Read"])]
+  //[RequiredScope(RequiredScopesConfigurationKey = "AzureAd:Scopes")]
+  //[RequiredScopeOrAppPermission(
+  //  RequiredScopesConfigurationKey = "AzureAd:Scopes",
+  //  RequiredAppPermissionsConfigurationKey = "AzureAd:AppPermissions"
+  //)]
   [ApiController]
   [Route("api/books")]
   public class BooksController : ControllerBase

@@ -1,7 +1,9 @@
 using AzureCosmos.CRUD.DataAccess.Config;
 using AzureCosmos.CRUD.DataAccess.Repository;
 using AzureCosmos.CRUD.WebAPI.Configurations;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Http.Resilience;
+using Microsoft.Identity.Web;
 using Polly;
 
 namespace AzureCosmos.CRUD.WebAPI
@@ -41,6 +43,16 @@ namespace AzureCosmos.CRUD.WebAPI
 
         return new HttpClient(resilienceHandler);
       });
+
+        // Add authentication and authorization
+        // We use the JSON Web Token (JWT) Bearer scheme as the default authentication mechanism.
+        // Use the AddAuthentication method to register the JWT bearer scheme.
+        // This validates the token and enables your web API to be protected using the Microsoft identity platform. (first option)
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+          .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+
+        // This enables the web API to be protected using the Microsoft identity platform. (second option)
+        //builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration.GetSection("AzureAd"));
 
       var app = builder.Build();
 
