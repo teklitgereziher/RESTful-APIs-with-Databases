@@ -20,7 +20,8 @@ namespace AzureCosmos.CRUD.WebAPI.Configurations
               PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
             },
             MaxRetryAttemptsOnRateLimitedRequests = 5,
-            MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(30)
+            MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(30),
+            AllowBulkExecution = true
           }));
       }
       else

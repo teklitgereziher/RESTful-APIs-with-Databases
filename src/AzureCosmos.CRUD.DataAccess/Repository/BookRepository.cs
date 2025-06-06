@@ -53,7 +53,7 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
       try
       {
         var feedResponse = await container.ReadManyItemsAsync<Book>(items);
-        return feedResponse.Resource.ToList();
+        return [.. feedResponse.Resource];
       }
       catch (CosmosException ex)
       {
@@ -74,10 +74,65 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
       {
         bookResponse = await container.CreateItemAsync(book, new PartitionKey(book.Id));
 
-        if (bookResponse.StatusCode == System.Net.HttpStatusCode.Created)
+        if (bookResponse.StatusCode == HttpStatusCode.Created)
         {
           logger.LogError("Book added successfully.");
         }
+      }
+      catch (CosmosException ex)
+      {
+        switch (ex.StatusCode)
+        {
+          case HttpStatusCode.TooManyRequests:
+            logger.LogError(ex, "Request rate too large. Retry after: {RetryAfter} seconds.", ex.RetryAfter);
+            await Task.Delay((TimeSpan)ex.RetryAfter);
+            break;
+
+          case HttpStatusCode.BadRequest:
+            logger.LogError(ex, "Bad request: {Message}", ex.Message);
+            break;
+
+          default:
+            logger.LogError(ex, "An error occurred: {StatusCode}, {Message}", ex.StatusCode, ex.Message);
+            break;
+        }
+      }
+
+      return bookResponse?.Resource;
+    }
+
+    public async Task<Book> BulkInsertAsync(List<Book> books)
+    {
+      ItemResponse<Book> bookResponse = null;
+      var tasks = new List<Task>();
+      var itemTasks = new List<Task<ItemResponse<Book>>>();
+      try
+      {
+        foreach (var book in books)
+        {
+          bookResponse = await container.CreateItemAsync(book, new PartitionKey(book.Id));
+          tasks.Add(container.CreateItemAsync(book, new PartitionKey(book.Id))
+            .ContinueWith(itemResponse =>
+            {
+              if (!itemResponse.IsCompletedSuccessfully)
+              {
+                AggregateException innerExceptions = itemResponse.Exception.Flatten();
+                if (innerExceptions.InnerExceptions.FirstOrDefault(innerEx => innerEx is CosmosException) is CosmosException cosmosException)
+                {
+                  logger.LogError(cosmosException, "Error adding book with bookId={BookId} {StatusCode} ({Message}).",
+                    book.Id,
+                    cosmosException.StatusCode,
+                    cosmosException.Message);
+                }
+                else
+                {
+                  logger.LogError(innerExceptions, "Error adding book with bookId={BookId}.", book.Id);
+                }
+              }
+            }));
+        }
+
+        await Task.WhenAll(tasks);
       }
       catch (CosmosException ex)
       {
