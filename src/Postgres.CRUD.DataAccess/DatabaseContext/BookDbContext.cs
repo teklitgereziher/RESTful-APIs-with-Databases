@@ -6,6 +6,10 @@ namespace Postgres.CRUD.DataAccess.DatabaseContext
   public class BookDbContext : DbContext
   {
     public DbSet<Book> Books { get; set; }
+    public DbSet<Student> Students { get; set; }
+    public DbSet<Instructor> Instructors { get; set; }
+    public DbSet<Person> People { get; set; }
+
     public BookDbContext(DbContextOptions<BookDbContext> options) : base(options)
     { }
 
