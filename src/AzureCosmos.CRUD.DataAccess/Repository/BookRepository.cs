@@ -1,6 +1,8 @@
+using System.Diagnostics;
 using System.Net;
 using AzureCosmos.CRUD.DataAccess.Config;
 using AzureCosmos.CRUD.DataAccess.Models;
+using Bogus;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -101,38 +103,42 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
       return bookResponse?.Resource;
     }
 
-    public async Task<Book> BulkInsertAsync(List<Book> books)
+    public async Task BulkInsertAsync(int numOfBooks)
     {
-      ItemResponse<Book> bookResponse = null;
+      var books = GenerateFakeBooks(numOfBooks);
       var tasks = new List<Task>();
-      var itemTasks = new List<Task<ItemResponse<Book>>>();
       try
       {
+        Stopwatch stopwatch = Stopwatch.StartNew();
         foreach (var book in books)
         {
-          bookResponse = await container.CreateItemAsync(book, new PartitionKey(book.Id));
+          //await container.CreateItemAsync(book, new PartitionKey(book.Id));
           tasks.Add(container.CreateItemAsync(book, new PartitionKey(book.Id))
-            .ContinueWith(itemResponse =>
+          .ContinueWith(itemResponse =>
+          {
+            if (!itemResponse.IsCompletedSuccessfully)
             {
-              if (!itemResponse.IsCompletedSuccessfully)
+              AggregateException innerExceptions = itemResponse.Exception.Flatten();
+              if (innerExceptions.InnerExceptions.FirstOrDefault(innerEx => innerEx is CosmosException) is CosmosException cosmosException)
               {
-                AggregateException innerExceptions = itemResponse.Exception.Flatten();
-                if (innerExceptions.InnerExceptions.FirstOrDefault(innerEx => innerEx is CosmosException) is CosmosException cosmosException)
-                {
-                  logger.LogError(cosmosException, "Error adding book with bookId={BookId} {StatusCode} ({Message}).",
-                    book.Id,
-                    cosmosException.StatusCode,
-                    cosmosException.Message);
-                }
-                else
-                {
-                  logger.LogError(innerExceptions, "Error adding book with bookId={BookId}.", book.Id);
-                }
+                logger.LogError(cosmosException, "Error adding book with bookId={BookId} {StatusCode} ({Message}).",
+                  book.Id,
+                  cosmosException.StatusCode,
+                  cosmosException.Message);
               }
-            }));
+              else
+              {
+                logger.LogError(innerExceptions, "Error adding book with bookId={BookId}.", book.Id);
+              }
+            }
+          }));
         }
 
         await Task.WhenAll(tasks);
+        stopwatch.Stop();
+        logger.LogInformation("Bulk insert completed in {ElapsedMilliseconds} ms for {Count} books.",
+          stopwatch.ElapsedMilliseconds,
+          numOfBooks);
       }
       catch (CosmosException ex)
       {
@@ -152,8 +158,38 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
             break;
         }
       }
+    }
 
-      return bookResponse?.Resource;
+    public async Task BulkInsertAsync2(int numOfBooks)
+    {
+      var books = GenerateFakeBooks(numOfBooks);
+      var tasks = new List<Task>();
+      Stopwatch stopwatch = Stopwatch.StartNew();
+      foreach (var book in books)
+      {
+        tasks.Add(container.CreateItemAsync(book, new PartitionKey(book.Id)));
+      }
+      try
+      {
+        await Task.WhenAll(tasks);
+        stopwatch.Stop();
+        logger.LogInformation("Bulk insert completed in {ElapsedMilliseconds} ms for {Count} books.",
+          stopwatch.ElapsedMilliseconds,
+          numOfBooks);
+      }
+      catch (AggregateException ex)
+      {
+        if (ex.InnerExceptions.FirstOrDefault(innerEx => innerEx is CosmosException) is CosmosException cosmosException)
+        {
+          logger.LogError(cosmosException, "Error adding book {StatusCode} ({Message}).",
+            cosmosException.StatusCode,
+            cosmosException.Message);
+        }
+        else
+        {
+          logger.LogError(ex, "Error adding book.");
+        }
+      }
     }
 
     public async Task<Book> InsertOrReplaceAsync(Book book)
@@ -259,6 +295,31 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
       }
 
       return books;
+    }
+
+    public static List<Book> GenerateFakeBooks(int count)
+    {
+      var authorFaker = new Faker<Author>()
+          .RuleFor(a => a.Name, f => f.Name.FullName())
+          .RuleFor(a => a.Phone, f => f.Phone.PhoneNumber())
+          .RuleFor(a => a.Email, f => f.Internet.Email())
+          .RuleFor(a => a.Website, f => f.Internet.Url());
+
+      var publisherFaker = new Faker<Publisher>()
+          .RuleFor(p => p.Name, f => f.Company.CompanyName())
+          .RuleFor(p => p.Phone, f => f.Phone.PhoneNumber())
+          .RuleFor(p => p.Email, f => f.Internet.Email())
+          .RuleFor(p => p.Website, f => f.Internet.Url());
+
+      var bookFaker = new Faker<Book>()
+          .RuleFor(b => b.Id, f => f.Random.Guid().ToString())
+          .RuleFor(b => b.Title, f => f.Lorem.Sentence(10))
+          .RuleFor(b => b.Year, f => f.Date.Past(20).Year)
+          .RuleFor(b => b.Price, f => f.Finance.Amount(5, 200))
+          .RuleFor(b => b.Author, f => authorFaker.Generate())
+          .RuleFor(b => b.Publisher, f => publisherFaker.Generate());
+
+      return bookFaker.Generate(count);
     }
   }
 }

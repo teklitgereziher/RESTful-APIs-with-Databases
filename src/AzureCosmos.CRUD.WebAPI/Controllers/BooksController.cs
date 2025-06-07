@@ -106,6 +106,22 @@ namespace AzureCosmos.CRUD.WebAPI.Controllers
     }
 
     [HttpPost]
+    public async Task<IActionResult> AddBulkBooks([Required][FromQuery] int numOfBooks)
+    {
+      try
+      {
+        await bookRepository.BulkInsertAsync(numOfBooks);
+
+        return Ok();
+      }
+      catch (Exception ex)
+      {
+        logger.LogError(ex, "Error while adding book to database.");
+        return StatusCode(StatusCodes.Status500InternalServerError, InternalServerErrorMessage);
+      }
+    }
+
+    [HttpPost]
     [Route("updatebook")]
     public async Task<IActionResult> UpdateBook([Required][FromQuery] string bookId, string bookTitle)
     {

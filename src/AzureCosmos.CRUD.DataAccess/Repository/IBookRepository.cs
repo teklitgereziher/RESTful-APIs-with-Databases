@@ -12,6 +12,6 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
     Task<bool?> DeleteBookAsync(string bookId);
     Task<List<Book>> QueryBooksAsync(string bookTitle);
     Task<Book> AddBookAsync(Book book);
-    Task<Book> BulkInsertAsync(List<Book> books);
+    Task BulkInsertAsync(int numOfBooks);
   }
 }
