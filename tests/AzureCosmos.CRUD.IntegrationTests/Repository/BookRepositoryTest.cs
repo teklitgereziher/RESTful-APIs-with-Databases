@@ -20,14 +20,14 @@ namespace AzureCosmos.CRUD.IntegrationTests.Repository
     {
       // Arrange  
       var bookId = "1";
-      var book = new Book { Id = bookId, Title = "Test Book" };
+      var book = new Book { BookId = bookId, Title = "Test Book" };
 
       // Act  
       var result = await repository.InsertOrReplaceAsync(book);
 
       // Assert  
       Assert.NotNull(result);
-      Assert.Equal(book.Id, result.Id);
+      Assert.Equal(book.BookId, result.BookId);
       Assert.Equal(book.Title, result.Title);
     }
 
@@ -48,14 +48,14 @@ namespace AzureCosmos.CRUD.IntegrationTests.Repository
     public async Task AddBookAsync_ShouldReturnBook_WhenBookIsAdded()
     {
       // Arrange
-      var newBook = new Book { Id = "3", Title = "New Book" };
+      var newBook = new Book { BookId = "3", Title = "New Book" };
 
       // Act
       var result = await repository.AddBookAsync(newBook);
 
       // Assert
       Assert.NotNull(result);
-      Assert.Equal(newBook.Id, result.Id);
+      Assert.Equal(newBook.BookId, result.BookId);
       Assert.Equal(newBook.Title, result.Title);
     }
 
@@ -63,11 +63,11 @@ namespace AzureCosmos.CRUD.IntegrationTests.Repository
     public async Task DeleteBookAsync_ShouldReturnTrue_WhenBookIsDeleted()
     {
       // Arrange
-      var newBook = new Book { Id = "4", Title = "New Book" };
+      var newBook = new Book { BookId = "4", Title = "New Book" };
       var result = await repository.AddBookAsync(newBook);
 
       // Act
-      var deleteResult = await repository.DeleteBookAsync(newBook.Id);
+      var deleteResult = await repository.DeleteBookAsync(newBook.BookId);
 
       // Assert
       Assert.NotNull(deleteResult);
@@ -91,17 +91,17 @@ namespace AzureCosmos.CRUD.IntegrationTests.Repository
     public async Task UpdateBookAsync_ShouldReturnUpdatedBook_WhenBookIsUpdated()
     {
       // Arrange
-      var newBook = new Book { Id = "6", Title = "New Book" };
+      var newBook = new Book { BookId = "6", Title = "New Book" };
       var result = await repository.AddBookAsync(newBook);
 
       var updatedTitle = "Updated Title";
 
       // Act
-      var updatedBook = await repository.UpdateBookAsync(newBook.Id, updatedTitle);
+      var updatedBook = await repository.UpdateBookAsync(newBook.BookId, updatedTitle);
 
       // Assert
       Assert.NotNull(result);
-      Assert.Equal(newBook.Id, updatedBook.Id);
+      Assert.Equal(newBook.BookId, updatedBook.BookId);
       Assert.Equal(updatedTitle, updatedBook.Title);
     }
 
@@ -112,8 +112,8 @@ namespace AzureCosmos.CRUD.IntegrationTests.Repository
       var bookTitle = "Test Book";
       var books = new List<Book>
         {
-            new Book { Id = "7", Title = bookTitle },
-            new Book { Id = "8", Title = bookTitle }
+            new Book { BookId = "7", Title = bookTitle },
+            new Book { BookId = "8", Title = bookTitle }
         };
       foreach (var book in books)
       {

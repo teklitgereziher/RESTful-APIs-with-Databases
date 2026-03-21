@@ -1,6 +1,5 @@
 using AzureCosmos.CRUD.DataAccess.Config;
 using AzureCosmos.CRUD.DataAccess.Repository;
-using AzureCosmos.CRUD.WebAPI.AutoMapper;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
 using Microsoft.AspNetCore.Builder;
@@ -18,14 +17,13 @@ namespace AzureCosmos.CRUD.IntegrationTests.SetupCosmos
   {
     private IConfiguration configuration;
     private static readonly IOutputConsumer outputConsumer = Consume.RedirectStdoutAndStderrToStream(new MemoryStream(), new MemoryStream());
-    private CosmosDbContainer cosmosDbContainer = new CosmosDbBuilder()
-      .WithImage("mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest")
+    private readonly CosmosDbContainer cosmosDbContainer = new CosmosDbBuilder("mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest")
       .WithName("cosmosdb-test-emulator")
       .WithPortBinding(8081, 8081)
       .WithEnvironment("AZURE_COSMOS_EMULATOR_IP_ADDRESS_OVERRIDE", "127.0.0.1")
       .WithEnvironment("AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE", "false")
       .WithOutputConsumer(outputConsumer)
-      .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(8081)
+      .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(8081)
       .UntilMessageIsLogged("Started"))
       .Build();
 
@@ -60,6 +58,16 @@ namespace AzureCosmos.CRUD.IntegrationTests.SetupCosmos
     {
       await cosmosDbContainer.DisposeAsync();
     }
+
+    ValueTask IAsyncLifetime.InitializeAsync()
+    {
+      throw new NotImplementedException();
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+      GC.SuppressFinalize(this);
+    }
   }
 
   public static class ServiceCollectionExtensions
@@ -72,10 +80,9 @@ namespace AzureCosmos.CRUD.IntegrationTests.SetupCosmos
       var dbSettings = configuration.GetSection("CosmosSettings").Get<CosmosSettings>();
       services.Configure<CosmosSettings>(configuration.GetSection("CosmosSettings"));
       services.AddTransient<IBookRepository, BookRepository>();
-      services.AddSingleton(AutoMapperConfig.Mapper);
       services.AddSingleton(sp => new CosmosClient(cosmosDbContainer.GetConnectionString(), new CosmosClientOptions
       {
-        ConnectionMode = ConnectionMode.Gateway,
+        ConnectionMode = Microsoft.Azure.Cosmos.ConnectionMode.Gateway,
         HttpClientFactory = () =>
         {
           HttpMessageHandler httpMessageHandler = new HttpClientHandler()

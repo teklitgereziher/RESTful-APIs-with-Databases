@@ -14,8 +14,7 @@ namespace Postgres.CRUD.WebAPI.IntegrationTests.SetupPostgres
   public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
   {
     protected BookDbContext dbContext;
-    private PostgreSqlContainer dbContainer = new PostgreSqlBuilder()
-      .WithImage("postgres:latest")
+    private readonly PostgreSqlContainer dbContainer = new PostgreSqlBuilder("postgres:latest")
       .WithDatabase("testdb")
       .WithUsername("admin")
       .WithPassword("admin")
@@ -34,7 +33,7 @@ namespace Postgres.CRUD.WebAPI.IntegrationTests.SetupPostgres
       base.ConfigureWebHost(builder);
       builder.ConfigureTestServices(services =>
       {
-        services.RemoveAll(typeof(DbContextOptions<BookDbContext>));
+        services.RemoveAll<DbContextOptions<BookDbContext>>();
         services.AddDbContext<BookDbContext>(options =>
         {
           options.UseNpgsql(conString);
@@ -46,7 +45,7 @@ namespace Postgres.CRUD.WebAPI.IntegrationTests.SetupPostgres
     /// Initializes the container
     /// </summary>
     /// <returns></returns>
-    public async Task InitializeAsync()
+    async ValueTask IAsyncLifetime.InitializeAsync()
     {
       await dbContainer.StartAsync();
       dbContext = Services.CreateScope().ServiceProvider.GetRequiredService<BookDbContext>();
@@ -57,9 +56,10 @@ namespace Postgres.CRUD.WebAPI.IntegrationTests.SetupPostgres
     /// Disposes the container when the test is completed
     /// </summary>
     /// <returns></returns>
-    async Task IAsyncLifetime.DisposeAsync()
+    async ValueTask IAsyncDisposable.DisposeAsync()
     {
       await dbContainer.DisposeAsync();
+      GC.SuppressFinalize(this);
     }
 
     public void ClearTables()

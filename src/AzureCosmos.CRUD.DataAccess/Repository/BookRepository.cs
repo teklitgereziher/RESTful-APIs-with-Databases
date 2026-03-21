@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace AzureCosmos.CRUD.DataAccess.Repository
 {
-  public class BookRepository : IBookRepository
+  public partial class BookRepository : IBookRepository
   {
     private readonly ILogger<BookRepository> logger;
     private readonly Container container;
@@ -69,12 +69,57 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
       return [];
     }
 
+    public async Task<List<Book>> GetBooksAsync(
+      List<string> bookIds,
+      string publisherId,
+      string userId,
+      List<(string property, bool decending)> orderProperties)
+    {
+      try
+      {
+        var requestOptions = new QueryRequestOptions
+        {
+          MaxItemCount = -1,
+          PartitionKey = new PartitionKeyBuilder().Add(publisherId).Add(userId).Build()
+        };
+
+        var queryable = container.GetItemLinqQueryable<Book>
+        (
+          allowSynchronousQueryExecution: true,
+          requestOptions: requestOptions
+        ).Where(c => bookIds.Contains(c.BookId));
+
+        var orderQueryable = ApplyDynamicOrdering(queryable, orderProperties);
+
+        var iterator = CreateFeedIterator(orderQueryable);
+        var books = new List<Book>();
+
+        while (iterator.HasMoreResults)
+        {
+          var resp = await iterator.ReadNextAsync();
+          books.AddRange(resp);
+        }
+
+        return books;
+      }
+      catch (CosmosException ex)
+      {
+        logger.LogError(ex, "Cosmos db exception while reading books.");
+      }
+      catch (Exception ex)
+      {
+        logger.LogError(ex, "Error reading books.");
+      }
+
+      return [];
+    }
+
     public async Task<Book> AddBookAsync(Book book)
     {
       ItemResponse<Book> bookResponse = null;
       try
       {
-        bookResponse = await container.CreateItemAsync(book, new PartitionKey(book.Id));
+        bookResponse = await container.CreateItemAsync(book, new PartitionKey(book.BookId));
 
         if (bookResponse.StatusCode == HttpStatusCode.Created)
         {
@@ -103,9 +148,12 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
       return bookResponse?.Resource;
     }
 
-    public async Task BulkInsertAsync(int numOfBooks)
+    public async Task BulkInsertAsync(
+      int numOfBooks,
+      string publisherId,
+      string userId)
     {
-      var books = GenerateFakeBooks(numOfBooks);
+      var books = GenerateFakeBooks(numOfBooks, publisherId, userId);
       var tasks = new List<Task>();
       try
       {
@@ -113,7 +161,7 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
         foreach (var book in books)
         {
           //await container.CreateItemAsync(book, new PartitionKey(book.Id));
-          tasks.Add(container.CreateItemAsync(book, new PartitionKey(book.Id))
+          tasks.Add(container.CreateItemAsync(book, new PartitionKey(book.BookId))
           .ContinueWith(itemResponse =>
           {
             if (!itemResponse.IsCompletedSuccessfully)
@@ -122,13 +170,13 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
               if (innerExceptions.InnerExceptions.FirstOrDefault(innerEx => innerEx is CosmosException) is CosmosException cosmosException)
               {
                 logger.LogError(cosmosException, "Error adding book with bookId={BookId} {StatusCode} ({Message}).",
-                  book.Id,
+                  book.BookId,
                   cosmosException.StatusCode,
                   cosmosException.Message);
               }
               else
               {
-                logger.LogError(innerExceptions, "Error adding book with bookId={BookId}.", book.Id);
+                logger.LogError(innerExceptions, "Error adding book with bookId={BookId}.", book.BookId);
               }
             }
           }));
@@ -160,14 +208,17 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
       }
     }
 
-    public async Task BulkInsertAsync2(int numOfBooks)
+    public async Task BulkInsertAsync2(
+      int numOfBooks,
+      string publisherId,
+      string userId)
     {
-      var books = GenerateFakeBooks(numOfBooks);
+      var books = GenerateFakeBooks(numOfBooks, publisherId, userId);
       var tasks = new List<Task>();
       Stopwatch stopwatch = Stopwatch.StartNew();
       foreach (var book in books)
       {
-        tasks.Add(container.CreateItemAsync(book, new PartitionKey(book.Id)));
+        tasks.Add(container.CreateItemAsync(book, new PartitionKey(book.BookId)));
       }
       try
       {
@@ -196,20 +247,20 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
     {
       try
       {
-        var itemResult = await container.UpsertItemAsync(book, new PartitionKey(book?.Id));
+        var itemResult = await container.UpsertItemAsync(book, new PartitionKey(book?.BookId));
         if (itemResult.StatusCode == HttpStatusCode.Created)
         {
-          logger.LogInformation("Book with bookId={BookId} created.", book?.Id);
+          logger.LogInformation("Book with bookId={BookId} created.", book?.BookId);
         }
         else if (itemResult.StatusCode == HttpStatusCode.OK)
         {
-          logger.LogInformation("Book with bookId={BookId} updated.", book?.Id);
+          logger.LogInformation("Book with bookId={BookId} updated.", book?.BookId);
         }
         return itemResult.Resource;
       }
       catch (CosmosException ex)
       {
-        logger.LogError(ex, "Error inserting or replacing book with bookId={BookId}.", book?.Id);
+        logger.LogError(ex, "Error inserting or replacing book with bookId={BookId}.", book?.BookId);
       }
       catch (ArgumentNullException ex)
       {
@@ -297,7 +348,10 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
       return books;
     }
 
-    public static List<Book> GenerateFakeBooks(int count)
+    public static List<Book> GenerateFakeBooks(
+      int count,
+      string publisherId,
+      string userId)
     {
       var authorFaker = new Faker<Author>()
           .RuleFor(a => a.Name, f => f.Name.FullName())
@@ -305,19 +359,20 @@ namespace AzureCosmos.CRUD.DataAccess.Repository
           .RuleFor(a => a.Email, f => f.Internet.Email())
           .RuleFor(a => a.Website, f => f.Internet.Url());
 
-      var publisherFaker = new Faker<Publisher>()
-          .RuleFor(p => p.Name, f => f.Company.CompanyName())
-          .RuleFor(p => p.Phone, f => f.Phone.PhoneNumber())
-          .RuleFor(p => p.Email, f => f.Internet.Email())
-          .RuleFor(p => p.Website, f => f.Internet.Url());
+      //var publisherFaker = new Faker<Publisher>()
+      //    .RuleFor(p => p.Name, f => f.Company.CompanyName())
+      //    .RuleFor(p => p.Phone, f => f.Phone.PhoneNumber())
+      //    .RuleFor(p => p.Email, f => f.Internet.Email())
+      //    .RuleFor(p => p.Website, f => f.Internet.Url());
 
       var bookFaker = new Faker<Book>()
-          .RuleFor(b => b.Id, f => f.Random.Guid().ToString())
+          .RuleFor(b => b.BookId, f => f.Random.Guid().ToString())
+          .RuleFor(b => b.UserId, userId)
+          .RuleFor(b => b.PublsherId, publisherId)
           .RuleFor(b => b.Title, f => f.Lorem.Sentence(10))
           .RuleFor(b => b.Year, f => f.Date.Past(20).Year)
           .RuleFor(b => b.Price, f => f.Finance.Amount(5, 200))
-          .RuleFor(b => b.Author, f => authorFaker.Generate())
-          .RuleFor(b => b.Publisher, f => publisherFaker.Generate());
+          .RuleFor(b => b.Author, f => authorFaker.Generate());
 
       return bookFaker.Generate(count);
     }

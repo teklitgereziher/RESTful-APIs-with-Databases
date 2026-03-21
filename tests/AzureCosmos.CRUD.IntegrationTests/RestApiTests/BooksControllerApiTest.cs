@@ -37,7 +37,7 @@ namespace AzureCosmos.CRUD.IntegrationTests.RestApiTests
       var data = await response.Content.ReadAsStringAsync();
       var book = JsonConvert.DeserializeObject<Book>(data);
 
-      var persistedBook = await bookRepository.GetBookAsync(newBook.Id);
+      var persistedBook = await bookRepository.GetBookAsync(newBook.BookId);
 
     }
 
@@ -55,13 +55,13 @@ namespace AzureCosmos.CRUD.IntegrationTests.RestApiTests
       var data = await response.Content.ReadAsStringAsync();
       var book = JsonConvert.DeserializeObject<Book>(data);
 
-      var response2 = await clientWithoutAuth.GetAsync($"/api/books/book?bookId={newBook.Id}");
+      var response2 = await clientWithoutAuth.GetAsync($"/api/books/book?bookId={newBook.BookId}");
 
       // Assert  
       Assert.Equal(HttpStatusCode.OK, response.StatusCode);
       var data2 = await response.Content.ReadAsStringAsync();
       var book2 = JsonConvert.DeserializeObject<Book>(data2);
-      Assert.Equal(book.Id, book2.Id);
+      Assert.Equal(book.BookId, book2.BookId);
       Assert.Equal(book.Title, book2.Title);
     }
 
@@ -69,7 +69,7 @@ namespace AzureCosmos.CRUD.IntegrationTests.RestApiTests
     {
       return new Book
       {
-        Id = "123",
+        BookId = "123",
         Title = "Test Book",
         Year = 1989,
         Price = 10.9M,
@@ -79,13 +79,6 @@ namespace AzureCosmos.CRUD.IntegrationTests.RestApiTests
           Phone = "+46 12345",
           Email = "example@example.com",
           Website = "example.com"
-        },
-        Publisher = new Publisher
-        {
-          Name = "McGill Publisher",
-          Phone = "+33 59745949",
-          Email = "mcgill@example.com",
-          Website = "mcgill.com"
         }
       };
     }

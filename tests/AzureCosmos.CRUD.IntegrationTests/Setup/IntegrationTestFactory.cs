@@ -21,14 +21,13 @@ namespace AzureCosmos.CRUD.IntegrationTests.Setup
   {
     CosmosClient cosmosClient;
     private static readonly IOutputConsumer outputConsumer = Consume.RedirectStdoutAndStderrToStream(new MemoryStream(), new MemoryStream());
-    private CosmosDbContainer cosmosDbContainer = new CosmosDbBuilder()
-      .WithImage("mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest")
+    private readonly CosmosDbContainer cosmosDbContainer = new CosmosDbBuilder("mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest")
       .WithName("cosmosdb-test-emulator")
       .WithPortBinding(8081, 8081)
       .WithEnvironment("AZURE_COSMOS_EMULATOR_IP_ADDRESS_OVERRIDE", "127.0.0.1")
       .WithEnvironment("AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE", "false")
       .WithOutputConsumer(outputConsumer)
-      .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(8081)
+      .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(8081)
       .UntilMessageIsLogged("Started"))
       .Build();
 
@@ -47,7 +46,7 @@ namespace AzureCosmos.CRUD.IntegrationTests.Setup
         services.RemoveAll<CosmosClient>();
         services.AddSingleton(sp => new CosmosClient(cosmosDbContainer.GetConnectionString(), new CosmosClientOptions
         {
-          ConnectionMode = ConnectionMode.Gateway,
+          ConnectionMode = Microsoft.Azure.Cosmos.ConnectionMode.Gateway,
           HttpClientFactory = () =>
           {
             HttpMessageHandler httpMessageHandler = new HttpClientHandler()
@@ -69,7 +68,7 @@ namespace AzureCosmos.CRUD.IntegrationTests.Setup
     /// Initializes the container
     /// </summary>
     /// <returns></returns>
-    public async Task InitializeAsync()
+    async ValueTask IAsyncLifetime.InitializeAsync()
     {
       await cosmosDbContainer.StartAsync();
       var dbSettings = Services.GetRequiredService<IOptions<CosmosSettings>>().Value;
@@ -82,9 +81,10 @@ namespace AzureCosmos.CRUD.IntegrationTests.Setup
     /// Disposes the container when the test is completed
     /// </summary>
     /// <returns></returns>
-    async Task IAsyncLifetime.DisposeAsync()
+    async ValueTask IAsyncDisposable.DisposeAsync()
     {
       await cosmosDbContainer.DisposeAsync();
+      GC.SuppressFinalize(this);
     }
 
     //public void ClearTables()

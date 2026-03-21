@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.12.35728.132
+# Visual Studio Version 18
+VisualStudioVersion = 18.4.11612.150 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker-files", "docker-files", "{8A8D608E-211C-4604-AB02-D079F1B5F157}"
 	ProjectSection(SolutionItems) = preProject
@@ -10,8 +10,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker-files", "docker-file
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{41716308-AC50-45E5-8B5F-5A28DBB1D7A0}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
+		src\Directory.Packages.props = src\Directory.Packages.props
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{BE16ECBA-18C7-4CAD-A053-37CDBBEF8C4A}"
+	ProjectSection(SolutionItems) = preProject
+		tests\Directory.Build.props = tests\Directory.Build.props
+		tests\Directory.Packages.props = tests\Directory.Packages.props
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureCosmos.CRUD.WebAPI", "src\AzureCosmos.CRUD.WebAPI\AzureCosmos.CRUD.WebAPI.csproj", "{0C623ACF-97DB-4B1F-BA52-9A04C126E60C}"
 EndProject
@@ -88,5 +96,8 @@ Global
 		{1D6F0E5A-F135-4373-973B-7743A9E9E236} = {BE16ECBA-18C7-4CAD-A053-37CDBBEF8C4A}
 		{A6BDBA35-C34C-4809-95F1-1ED8C45460CD} = {BE16ECBA-18C7-4CAD-A053-37CDBBEF8C4A}
 		{2E215010-F93C-4820-88A6-A6644C10E60B} = {E1B77AB6-ABED-4E3A-A8D0-41C1AAD84FAD}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CE55E6C0-D910-4FBC-A5CF-AD89E51894B6}
 	EndGlobalSection
 EndGlobal

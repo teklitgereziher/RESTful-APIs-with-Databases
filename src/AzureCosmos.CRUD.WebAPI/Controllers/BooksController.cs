@@ -88,6 +88,36 @@ namespace AzureCosmos.CRUD.WebAPI.Controllers
       }
     }
 
+    [HttpGet]
+    [Route("orderedlist")]
+    public async Task<IActionResult> GetBooksAsync(
+      List<string> bookIds,
+      string publisherId,
+      string userId,
+      List<(string property, bool decending)> orderProperties)
+    {
+      try
+      {
+        var books = await bookRepository.GetBooksAsync(
+          bookIds,
+          publisherId,
+          userId,
+          orderProperties);
+
+        if (!books.Any())
+        {
+          return NotFound();
+        }
+
+        return Ok(books);
+      }
+      catch (Exception ex)
+      {
+        logger.LogError(ex, "Error while getting books.");
+        return StatusCode(StatusCodes.Status500InternalServerError, InternalServerErrorMessage);
+      }
+    }
+
     [HttpPost]
     [Route("addbook")]
     public async Task<IActionResult> AddBook([BindRequired][FromBody] Book book)
@@ -106,11 +136,14 @@ namespace AzureCosmos.CRUD.WebAPI.Controllers
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddBulkBooks([Required][FromQuery] int numOfBooks)
+    public async Task<IActionResult> AddBulkBooks(
+      [Required][FromQuery] int numOfBooks,
+      [Required][FromQuery] string publisherId,
+      [Required][FromQuery] string userId)
     {
       try
       {
-        await bookRepository.BulkInsertAsync(numOfBooks);
+        await bookRepository.BulkInsertAsync(numOfBooks, publisherId, userId);
 
         return Ok();
       }
