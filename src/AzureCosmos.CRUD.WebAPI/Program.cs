@@ -62,6 +62,9 @@ namespace AzureCosmos.CRUD.WebAPI
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
           .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 
+        // Register authorization services so policies and the [Authorize] attribute work
+        builder.Services.AddAuthorization();
+
         // This enables the web API to be protected using the Microsoft identity platform. (second option)
         //builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration.GetSection("AzureAd"));
 
@@ -81,6 +84,8 @@ namespace AzureCosmos.CRUD.WebAPI
         //app.UseMiddleware<RequestTracingMiddleware>();
         app.UseSerilogRequestLogging();
 
+        // Enable authentication middleware to validate incoming JWTs
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();

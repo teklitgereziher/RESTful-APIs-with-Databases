@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using AzureCosmos.CRUD.DataAccess.Models;
 using AzureCosmos.CRUD.DataAccess.Repository;
-//using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Azure.Cosmos;
@@ -18,17 +17,11 @@ namespace AzureCosmos.CRUD.WebAPI.Controllers
   //)]
   [ApiController]
   [Route("api/books")]
-  public class BooksController : ControllerBase
+  public class BooksController(
+    ILogger<BooksController> logger,
+    IBookRepository bookRepository) : ControllerBase
   {
     private const string InternalServerErrorMessage = "Internal server error";
-    private readonly ILogger<BooksController> logger;
-    private readonly IBookRepository bookRepository;
-
-    public BooksController(ILogger<BooksController> logger, IBookRepository bookRepository)
-    {
-      this.logger = logger;
-      this.bookRepository = bookRepository;
-    }
 
     [HttpGet]
     [Route("book")]
